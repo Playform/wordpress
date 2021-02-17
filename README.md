@@ -1,0 +1,121 @@
+# WordPress NGINX Sample
+
+This is a sample WordPress website configured to run at https://wordpress.samples.playform.cloud with an included configuration for both PHP and NGINX.
+
+### Server Requirements
+
+-   Ubuntu 18.04.5 LTS
+-   nginx/1.19.7
+    -   headers-more-nginx-module
+    -   ngx_brotli
+    -   ngx_devel_kit
+    -   set-misc-nginx-module
+-   PHP 7.4.15
+    -   php-fpm
+-   mysql Ver 14.14 Distrib 5.7.33
+-   certbot 0.27.0
+
+# How to use
+
+## NGINX
+
+Install NGINX and add the following modules to your installation:
+
+-   https://github.com/openresty/headers-more-nginx-module
+-   https://github.com/google/ngx_brotli
+-   https://github.com/vision5/ngx_devel_kit
+-   https://github.com/openresty/set-misc-nginx-module
+
+Alternatively, you can use this pre-built NGINX package for Ubuntu 18.04 from https://github.com/nhristov/nginx-1.19.7
+
+Replace every occurrence of **wordpress.samples.playform.cloud** in [nginx/sites/wordpress.conf](nginx/sites/wordpress.conf) with **yourdomain.com**
+
+Generate DH Parameters:
+
+```bash
+mkdir -p /etc/nginx/ssl/
+cd /etc/nginx/ssl/
+sudo openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
+```
+
+Issue your certificates:
+
+```bash
+sudo apt install certbot -y
+certbot certonly -d yourdomain.com --standalone
+certbot certonly -d www.yourdomain.com --standalone
+```
+
+## PHP
+
+Install PHP 7.4 and [Composer](https://getcomposer.org/).
+
+Create the session folder for PHP-FPM:
+
+```bash
+mkdir -p /usr/share/nginx/sites/wordpress/tmp/session
+```
+
+Create a new user for the WordPress installation:
+
+```bash
+adduser --no-create-home --disabled-login --disabled-password wordpress
+```
+
+## WordPress
+
+Install [Bedrock](https://roots.io/bedrock/) from roots.io in **/usr/share/nginx/sites/wordpress/** and setup the required WordPress plugins:
+
+```
+composer require roots/soil
+composer require wpackagist-plugin/wordpress-seo
+composer require wpackagist-plugin/wp-optimize
+composer require wpackagist-plugin/wp-super-cache
+```
+
+Configure WP Super Cache by adding:
+
+```php
+/**
+ * WP Super Cache
+ */
+Config::define('WP_CACHE', env('WP_CACHE') ?: false);
+Config::define('WPCACHEHOME', $root_dir . '/web/app/plugins/wp-super-cache/');
+```
+
+to your **config/application.php** file and WP_CACHE your to **.env** file:
+
+```bash
+WP_CACHE=true
+```
+
+### WP CLI
+
+Setup the [WP CLI](https://wp-cli.org/) and install WordPress:
+
+```bash
+alias wp='wp --allow-root'
+
+wp core install \
+	--title="WordPress Sample" \
+	--admin_user="admin" \
+	--admin_password="admin" \
+	--admin_email="admin@playform.cloud" \
+	--url="https://wordpress.samples.playform.cloud" \
+	--skip-email
+
+# Update permalink structure.
+wp option update permalink_structure "/%postname%/" --skip-themes --skip-plugins
+wp rewrite structure "/%postname%/"
+
+wp plugin activate soil
+wp plugin activate wordpress-seo
+wp plugin activate wp-optimize
+wp plugin activate wp-super-cache
+```
+
+# Result
+
+![SSL Labs test](summary-ssl.png)
+![PageSpeed report](summary-pagespeed-1.png)
+![PageSpeed report](summary-pagespeed-2.png)
