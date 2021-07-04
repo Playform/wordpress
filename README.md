@@ -5,7 +5,7 @@ This is a sample WordPress website configured to run at https://wordpress.sample
 ### Server Requirements
 
 -   Ubuntu 18.04.5 LTS
--   nginx/1.19.7
+-   nginx/1.21.0
     -   headers-more-nginx-module
     -   ngx_brotli
     -   ngx_devel_kit
@@ -26,7 +26,7 @@ Install NGINX and add the following modules to your installation:
 -   https://github.com/vision5/ngx_devel_kit
 -   https://github.com/openresty/set-misc-nginx-module
 
-Alternatively, you can use this pre-built NGINX package for Ubuntu 18.04 from https://github.com/nhristov/nginx-1.19.7
+Alternatively, you can use this pre-built NGINX package for Ubuntu 18.04 from https://github.com/nhristov/nginx-1.21.0
 
 Replace every occurrence of **wordpress.samples.playform.cloud** in [nginx/sites/wordpress.conf](nginx/sites/wordpress.conf) with **yourdomain.com**
 
@@ -64,7 +64,7 @@ adduser --no-create-home --disabled-login --disabled-password wordpress
 
 ## WordPress
 
-Install [Bedrock](https://roots.io/bedrock/) from roots.io in **/usr/share/nginx/sites/wordpress/** and setup the required WordPress plugins:
+Install [Bedrock](https://roots.io/bedrock/) in the **/usr/share/nginx/sites/wordpress/** directory and add the required WordPress plugins:
 
 ```
 composer require roots/soil
@@ -73,7 +73,7 @@ composer require wpackagist-plugin/wp-optimize
 composer require wpackagist-plugin/wp-super-cache
 ```
 
-Configure WP Super Cache by adding:
+Configure the WP Super Cache plugin by adding:
 
 ```php
 /**
@@ -91,7 +91,7 @@ WP_CACHE=true
 
 ### WP CLI
 
-Setup the [WP CLI](https://wp-cli.org/) and install WordPress:
+Setup [WP CLI](https://wp-cli.org/) and install WordPress:
 
 ```bash
 alias wp='wp --allow-root'
